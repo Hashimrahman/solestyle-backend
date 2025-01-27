@@ -1,0 +1,46 @@
+GET http://127.0.0.1:8000/products/ HTTP/1.1
+Authorization: Token 3d8879fefc0ab6027e7b77482b4446c58f74ec9f
+
+###
+POST http://127.0.0.1:8000/products/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 20,
+    "name": "Product 20",
+    "category": "men",
+    "price": "3999.00",
+    "description": "Durable hiking boots for outdoor adventures.",
+    "sizes": [8, 9, 10, 11],
+    "brand": "Timberland",
+    "stock": 15,
+    "trending": false,
+    "image": null
+}
+
+###
+PUT http://127.0.0.1:8000/products/8/ HTTP/1.1
+Content-Type: application/json
+
+{
+    "id": 8,
+        "name": "Product 8h",
+        "category": "men",
+        "price": "49.99",
+        "description": "Description for Product 1",
+        "sizes": [
+            "4",
+            "5",
+            "6"
+        ],
+        "brand": "Brand A",
+        "stock": 100,
+        "trending": true,
+        "image": null
+}
+
+###
+
+DELETE http://127.0.0.1:8000/products/6/ HTTP/1.1
+
+

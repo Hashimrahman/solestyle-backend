@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-@-iogbybgch-!!a*ml$56=2oy2_w#4&((*^p46u=tq==05f87#
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['3.111.39.152']
+ALLOWED_HOSTS = ['3.111.39.152','127.0.0.1']
 
 
 # Application definition
@@ -89,28 +89,29 @@ WSGI_APPLICATION = 'solestyle.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'solestyle',
-        'USER' : 'postgres',
-        'PASSWORD' : '1102',
-        'HOST' : 'localhost',
-        'PORT': '5432',
-    }
-}
 # DATABASES = {
 #     'default': {
+#         # 'ENGINE': 'django.db.backends.sqlite3',
+#         # 'NAME': BASE_DIR / 'db.sqlite3',
 #         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': 'solestyledb',
-#         'USER': 'solestyleadmin',
-#         'PASSWORD': 'Solestyle[]12',
-#         'HOST': 'solestyledb.cxmgeieuyqo6.ap-south-1.rds.amazonaws.com',
+#         'NAME': 'solestyle',
+#         'USER' : 'postgres',
+#         'PASSWORD' : '1102',
+#         'HOST' : 'localhost',
 #         'PORT': '5432',
 #     }
 # }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'solestyledb',
+        'USER': 'solestyleadmin',
+        'PASSWORD': 'solestyle1102',
+        # 'HOST': 'solestyledb.cxmgeieuyqo6.ap-south-1.rds.amazonaws.com',
+        'HOST': 'solestyledb.cxmgeieuyqo6.ap-south-1.rds.amazonaws.com',
+        'PORT': '5432',
+    }
+}
 
 
 # Password validation

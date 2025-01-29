@@ -1,4 +1,8 @@
 import psycopg2
+from decouple import config
+
+print("key",config('AWS_SECRET_ACCESS_KEY'))
+print("id",config('AWS_ACCESS_KEY_ID'))
 
 connection = None
 try:

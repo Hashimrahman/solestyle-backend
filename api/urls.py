@@ -8,6 +8,7 @@ urlpatterns = [
     path("login/", obtain_auth_token, name="login"),
     path("login-form/", views.LoginView.as_view(), name="login-form"),
     path("logout/", views.logout_user, name="logout"),
+    # path("products/", views.ProductListCreateAPIView.as_view(), name="logout"),
     path("user-details/", views.UserDetailsAPIView.as_view(), name="user-deatail"),
     path("user/block-unblock/<int:user_id>/", views.BlockUnblockUserView.as_view(), name="block-unblock-user"),
     path('delete-user/<int:user_id>/', views.DeleteUSerAPIView.as_view(), name='delete-user'),  

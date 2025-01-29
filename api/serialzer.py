@@ -1,6 +1,7 @@
 from django.conf import settings
 from razorpay import Client
 from rest_framework import serializers
+from .utils.s3_utils import upload_image_to_s3
 
 from .models import Cart, CartItem, Order, OrderItem, Product, User
 
@@ -75,37 +76,66 @@ class UserRegisterSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    
+
     full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = User
         fields = "__all__"
-    
+
     def get_full_name(self, obj):
-        return f'{obj.first_name} {obj.last_name}'
+        return f"{obj.first_name} {obj.last_name}"
 
 
 # ------------------------------------------ ### PRODUCT ### ------------------------------------------
 
 
-class ProductSerializer(serializers.ModelSerializer):
+# class ProductSerializer(serializers.ModelSerializer):
 
+#     image_url = serializers.SerializerMethodField()
+
+#     class Meta:
+#         model = Product
+#         fields = "__all__"
+
+#         def validate_price(self, value):
+#             if value <= 0:
+#                 raise serializers.ValidationError("Price Must be greater than zero")
+#             return value
+
+
+#     def get_image_url(self, obj):
+#         if obj.image:
+#             return obj.image.url
+#         return None
+class ProductSerializer(serializers.ModelSerializer):
     image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
         fields = "__all__"
-
-        def validate_price(self, value):
-            if value <= 0:
-                raise serializers.ValidationError("Price Must be greater than zero")
-            return value
-
+        
     def get_image_url(self, obj):
-        if obj.image:
-            return obj.image.url
+        if obj.image and hasattr(obj.image, 'url'):
+            url = obj.image.url
+            print("Serialized Image URL:", url)
+            return url
         return None
+
+
+    def create(self, validated_data):
+        image_file = validated_data.get('image')
+    
+        if image_file:
+            image_name = f'products/{image_file.name}'  # 'products/' is the folder where you want to store images in S3
+            image_url = upload_image_to_s3(image_file, image_name)
+            print("ser url", image_url)
+            if not image_url:
+                raise serializers.ValidationError("Image upload failed.")
+            validated_data['image'] = image_url
+            print("Final Image Data Saved:", validated_data['image'])
+        return super().create(validated_data)
+
 
 
 # ------------------------------------------ ### CART ### ------------------------------------------
@@ -144,7 +174,7 @@ class CartSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cart
-        fields = ["user","username", "cartItems", "total_price"]
+        fields = ["user", "username", "cartItems", "total_price"]
 
 
 class CartItemAddUpdateSerializer(serializers.ModelSerializer):
@@ -236,7 +266,6 @@ class OrderItemSerializer(serializers.ModelSerializer):
     )
     product_image = serializers.ImageField(source="product.image")
 
-
     class Meta:
         model = OrderItem
         fields = [
@@ -246,7 +275,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
             "product_image",
             "quantity",
             "item_subtotal",
-            'is_cancelled',
+            "is_cancelled",
         ]
 
 
@@ -254,7 +283,7 @@ class OrderSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     total_price = serializers.SerializerMethodField(method_name="total")
     razorpay_order = serializers.SerializerMethodField()
-    username = serializers.CharField(source = "user.username")
+    username = serializers.CharField(source="user.username")
 
     def total(self, obj):
         order_items = obj.items.all()

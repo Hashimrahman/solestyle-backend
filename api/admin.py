@@ -26,7 +26,7 @@ class CustomUserAdmin(UserAdmin):
     
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'stock', 'trending', 'get_sizes')  # Added get_sizes to display sizes
+    list_display = ('name', 'category', 'price', 'stock', 'trending', 'get_sizes','image')  # Added get_sizes to display sizes
     list_filter = ('category', 'trending')  # Filter options on the sidebar
     search_fields = ('name', 'category', 'brand')  # Search fields
     list_editable = ('price', 'stock', 'trending')  # Fields that can be edited directly in the list view

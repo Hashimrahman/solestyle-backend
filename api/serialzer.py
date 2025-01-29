@@ -190,7 +190,7 @@ class CartItemAddUpdateSerializer(serializers.ModelSerializer):
         size = data["size"]
         sizes = product.sizes
 
-        if int(size) not in sizes:
+        if size not in sizes:
             raise serializers.ValidationError(
                 {"size": "Selected size is not available !!"}
             )

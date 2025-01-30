@@ -6,26 +6,19 @@ from django.db.models import F
 from django.shortcuts import HttpResponse, render
 from razorpay import Client
 from rest_framework import generics, serializers, status, views, viewsets
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.authtoken.models import Token
 
 from .models import Cart, CartItem, Order, OrderItem, Product, User
-from .serialzer import (
-    CartItemAddUpdateSerializer,
-    CartItemSerializer,
-    CartSerializer,
-    CheckoutSerializer,
-    OrderSerializer,
-    OrderStatisticsSerializer,
-    ProductSerializer,
-    UserRegisterSerializer,
-    UserSerializer,
-)
+from .serialzer import (CartItemAddUpdateSerializer, CartItemSerializer,
+                        CartSerializer, CheckoutSerializer, OrderSerializer,
+                        OrderStatisticsSerializer, ProductSerializer,
+                        UserRegisterSerializer, UserSerializer)
 
 # ------------------------------------------ ### REGISTER ### ------------------------------------------
 
@@ -46,12 +39,12 @@ class UserRegisterAPIView(generics.CreateAPIView):
             }
             return Response(data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 # class UseeRegister(views.APIView):
-    
+
 #     permission_classes = [AllowAny]
-    
+
 #     def post(self, request, *args, **kwargs):
 #         serializer = UserRegisterSerializer(data = request.data)
 #         if serializer.is_valid():
@@ -122,8 +115,7 @@ class LoginView(views.APIView):
                         "email": user.email,
                         "full_name": user.get_full_name(),
                         "is_staff": user.is_staff,
-                        "is_blocked" : user.is_blocked,
-                        
+                        "is_blocked": user.is_blocked,
                     },
                     "access_token": access_token,
                     "refresh_token": str(refresh),
@@ -138,13 +130,13 @@ class LoginView(views.APIView):
 
 # class Login(views.APIView):
 #     def post(self, request, *args, **kwargs):
-        
+
 #         username = request.data.get('username')
 #         password = request.data.get('password')
-        
+
 #         if not username or not password:
 #             return Response({"Error": "Username and password is required"}, status=status.HTTP_400_BAD_REQUEST)
-        
+
 #         user = authenticate(username=username, password = password)
 #         if user:
 #             token, created = Token.objects.get_or_create(user=user)
@@ -171,33 +163,37 @@ class UserDetailsAPIView(views.APIView):
                 "full_name": f"{user.first_name} {user.last_name}",
                 "email": user.email,
                 "is_staff": user.is_staff,
-                "username" : user.username,
+                "username": user.username,
             }
         )
 
 
 # ------------------------------------------ ### USER DELETE ### ------------------------------------------
 
+
 class DeleteUSerAPIView(views.APIView):
     permission_classes = [IsAdminUser]
-    
+
     def delete(self, request, *args, **kwargs):
-        user_id = kwargs.get('user_id')
-        
+        user_id = kwargs.get("user_id")
+
         try:
             user = User.objects.get(id=user_id)
             user.delete()
-            return Response({"message" : "User Deleted Successfully"}, status=status.HTTP_200_OK)
+            return Response(
+                {"message": "User Deleted Successfully"}, status=status.HTTP_200_OK
+            )
         except User.DoesNotExist:
             return Response(
-                {"error" : "User Not found"}, status=status.HTTP_404_NOT_FOUND
+                {"error": "User Not found"}, status=status.HTTP_404_NOT_FOUND
             )
+
 
 # ------------------------------------------ ### USER BLOCK UNLOCK ### ------------------------------------------
 
 
 class BlockUnblockUserView(views.APIView):
-    permission_classes = [IsAdminUser] 
+    permission_classes = [IsAdminUser]
 
     def post(self, request, *args, **kwargs):
         user_id = kwargs.get("user_id")
@@ -248,6 +244,8 @@ class BlockUnblockUserView(views.APIView):
 #             permission_classes = [IsAdminUser]
 #         return [permission() for permission in permission_classes]
 from .utils.s3_utils import upload_image_to_s3
+
+
 class ProductListCreateAPIView(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
@@ -260,7 +258,6 @@ class ProductListCreateAPIView(viewsets.ModelViewSet):
         else:
             permission_classes = [IsAdminUser]
         return [permission() for permission in permission_classes]
-
 
 
 class ProductsByCategoryAPIView(views.APIView):
@@ -289,9 +286,10 @@ class CartListAPIView(generics.ListAPIView):
         # query = super().get_queryset()
         # return query.filter(user=user)
         user = self.request.user
-        query = Cart.objects.select_related('user').prefetch_related('cartItems__product')
+        query = Cart.objects.select_related("user").prefetch_related(
+            "cartItems__product"
+        )
         return query.filter(user=user)
-        
 
 
 class CartAddAPIView(generics.CreateAPIView):
@@ -451,18 +449,15 @@ class CheckoutAPIView(views.APIView):
                                 f"Insufficient Stock for {product.name}",
                                 status=status.HTTP_400_BAD_REQUEST,
                             )
-                        
+
                         order_items.append(
-                            OrderItem(
-                               order=order, product=product, quantity=quantity 
-                            )
+                            OrderItem(order=order, product=product, quantity=quantity)
                         )
-                        
+
                         product.stock = F("stock") - quantity
                         product_update.append(product)
                         total_amount += product.price * quantity
-                        
-                        
+
                         # OrderItem.objects.create(
                         #     order=order, product=product, quantity=quantity
                         # )
@@ -472,7 +467,7 @@ class CheckoutAPIView(views.APIView):
 
                     OrderItem.objects.bulk_create(order_items)
                     Product.objects.bulk_update(product_update, ["stock"])
-                    
+
                     cart_items.delete()
 
                     # Razorpay integration
@@ -503,9 +498,6 @@ class CheckoutAPIView(views.APIView):
                     {"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-
 
 
 # ------------------------------------------ ### ORDER ### ------------------------------------------
